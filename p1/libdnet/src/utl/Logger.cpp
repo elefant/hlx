@@ -53,39 +53,6 @@ namespace utl
      */
     Logger::StaticData::StaticData()
     {
-    #if( UTL_LOGGER_LOG_TO_FILE )
-        try
-        {
-            removeOldLogs();
-
-            boost::filesystem::create_directories( getLogDir() );
-            iLogFp = fopen( ( getLogDir() + getLogName() ).c_str(), "w" );
-            std::string symlinkName = getLogDir() + "latest.txt";
-            unlink( symlinkName.c_str() );
-            symlink( ( getLogDir() + getLogName() ).c_str(), symlinkName.c_str() );
-            setlinebuf( iLogFp );
-            const char* START_STRING =
-                "//-------------------------------------------------------\n"
-                "// Log starts @ %s\n"
-                "//-------------------------------------------------------\n";
-
-            if( iLogFp )
-            {
-                fprintf( iLogFp, START_STRING, getNowString().c_str() );
-            }
-        }
-        catch( const boost::filesystem::filesystem_error& e )
-        {
-            fprintf
-                (
-                stderr,
-                "Cannot create log directory %s: %s\n. Run w/o log.\n",
-                getLogDir().c_str(),
-                e.code().message().c_str()
-                );
-            return;
-        }
-    #endif
     }
 
     /**
@@ -93,20 +60,6 @@ namespace utl
      */
     Logger::StaticData::~StaticData()
     {
-    #if( UTL_LOGGER_LOG_TO_FILE )
-        const char* END_STRING =
-            "//-------------------------------------------------------\n"
-            "// Log ends @ %s\n"
-            "//-------------------------------------------------------\n"
-            "\n"
-            "\n";
-
-        if( iLogFp )
-        {
-            fprintf( iLogFp, END_STRING, getNowString().c_str() );
-            fclose( iLogFp );
-        }
-    #endif
     }
 
     /**

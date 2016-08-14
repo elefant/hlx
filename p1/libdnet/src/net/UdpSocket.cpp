@@ -19,7 +19,7 @@ namespace net
 
     /**
      * Create UDP socket pointer
-     * @return 
+     * @return
      */
     UdpSocketPtr UdpSocket::Create()
     {
@@ -28,7 +28,7 @@ namespace net
 
     /**
      * Get dest port
-     * @return 
+     * @return
      */
     short UdpSocket::getSendDestPort() const
     {
@@ -62,7 +62,7 @@ namespace net
      * @param aBuffer
      * @param aSendSize
      * @param aTimeout
-     * @return 
+     * @return
      */
     int UdpSocket::posixSend
         (
@@ -75,12 +75,12 @@ namespace net
         {
             return ::sendto
                 (
-                iSocket, 
-                aBuffer, 
-                aSendSize, 
-                MSG_NOSIGNAL,                 
+                iSocket,
+                aBuffer,
+                aSendSize,
+                0, //MSG_NOSIGNAL,
                 (struct sockaddr*)&iSendDestSockAddr,
-                sizeof( iSendDestSockAddr ) 
+                sizeof( iSendDestSockAddr )
                 );
         }
         else
@@ -94,7 +94,7 @@ namespace net
      * @param aBuffer
      * @param aRecvSize
      * @param aTimeout
-     * @return 
+     * @return
      */
     int UdpSocket::posixReceive
         (
@@ -102,7 +102,7 @@ namespace net
         int aRecvSize,
         int aTimeout
         )
-    {    
+    {
         AutoSetNonblock setNonblock( this );
 
         if( select( aTimeout ) > 0 )
@@ -111,9 +111,9 @@ namespace net
             socklen_t len = sizeof( remote );
             return ::recvfrom
                 (
-                iSocket, 
-                aBuffer, 
-                aRecvSize, 
+                iSocket,
+                aBuffer,
+                aRecvSize,
                 0,
                 ( struct sockaddr* )&remote,
                 &len
@@ -122,13 +122,13 @@ namespace net
 
         return -1;
     }
-    
+
      /**
      * Peek from remote
      * @param aBuffer
      * @param aRecvSize
      * @param aTimeout
-     * @return 
+     * @return
      */
     int UdpSocket::posixPeek
         (
@@ -145,9 +145,9 @@ namespace net
             socklen_t len = sizeof( remote );
             return ::recvfrom
                 (
-                iSocket, 
-                aBuffer, 
-                aRecvSize, 
+                iSocket,
+                aBuffer,
+                aRecvSize,
                 MSG_PEEK,
                 ( struct sockaddr* )&remote,
                 &len
@@ -164,7 +164,7 @@ namespace net
      * @param aDestIp
      * @param aDestPort
      * @param aTimeout
-     * @return 
+     * @return
      */
     int UdpSocket::sendTo
         (
@@ -178,12 +178,12 @@ namespace net
         sockaddr_in destSockAddr = createSockAddrIn( aDestIp, aDestPort );
         return ::sendto
             (
-            iSocket, 
-            aBuffer, 
-            aSendSize, 
-            MSG_NOSIGNAL,                 
+            iSocket,
+            aBuffer,
+            aSendSize,
+            0, //MSG_NOSIGNAL,
             (struct sockaddr*)&destSockAddr,
-            sizeof( destSockAddr ) 
+            sizeof( destSockAddr )
             );
     }
 
@@ -194,7 +194,7 @@ namespace net
      * @param aFromIp
      * @param aFromPort
      * @param aTimeout
-     * @return 
+     * @return
      */
     int UdpSocket::receivFrom
         (
@@ -211,9 +211,9 @@ namespace net
             socklen_t len = sizeof( remote );
             int ret = ::recvfrom
                 (
-                iSocket, 
-                aBuffer, 
-                aRecvSize, 
+                iSocket,
+                aBuffer,
+                aRecvSize,
                 0,
                 ( struct sockaddr* )&remote,
                 &len
@@ -230,7 +230,7 @@ namespace net
 
     /**
      * Get udp output q bytes
-     * @return 
+     * @return
      */
     int UdpSocket::getOutqBytes() const
     {
@@ -242,6 +242,6 @@ namespace net
 
         return -1;
     }
-    
+
 }
 

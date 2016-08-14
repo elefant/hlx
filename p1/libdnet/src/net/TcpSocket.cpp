@@ -72,7 +72,7 @@ namespace net
         int
         )
     {
-        return ::send( iSocket, aBuffer, aSendSize, MSG_NOSIGNAL );
+        return ::send( iSocket, aBuffer, aSendSize, 0 /*MSG_NOSIGNAL*/ );
     }
 
     /**

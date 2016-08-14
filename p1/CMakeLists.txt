@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 
 project( TestClientServer )
 
-find_package( Threads REQUIRED )
+find_package( Boost COMPONENTS thread REQUIRED )
 
 add_subdirectory( libdnet )
 
-#include_directories ( src tmp )
 include_directories ( libdnet/src )
+include_directories ( ${Boost_INCLUDE_DIRS} )
 
 #-----------------------------------------------------
 # libdnet

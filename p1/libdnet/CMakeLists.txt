@@ -2,12 +2,20 @@ cmake_minimum_required( VERSION 2.8 )
 
 project( dnet )
 
+find_package( Threads REQUIRED )
+find_package( Boost REQUIRED )
+
+message(${Boost_INCLUDE_DIRS})
+
 set( MY_SRC_DIR ${PROJECT_SOURCE_DIR}/src )
 
 #--------------------------------------
 # Include and link directories
 #--------------------------------------
 include_directories( ${MY_SRC_DIR} )
+include_directories( ${Boost_INCLUDE_DIRS} )
+
+link_directories( ${Boost_LIBRARY_DIRS} )
 
 #--------------------------------------
 # Source files
@@ -38,10 +46,9 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(
     ${PROJECT_NAME}
-    libboost_thread.a
-    libboost_date_time.a
-    libboost_filesystem.a
-    libboost_system.a
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_DATE_TIME_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
     pthread
     )
 
