@@ -26,17 +26,14 @@ set(
     ${MY_SRC_DIR}/net/TcpSocket.cpp
     ${MY_SRC_DIR}/net/UdpSocket.cpp
     ${MY_SRC_DIR}/net/TcpServer.cpp
-    ${MY_SRC_DIR}/net/Misc.cpp
-    ${MY_SRC_DIR}/net/PortPool.cpp
+    #${MY_SRC_DIR}/net/Misc.cpp
+    #${MY_SRC_DIR}/net/PortPool.cpp
 
     ${MY_SRC_DIR}/sys/ThreadPool.cpp
-    ${MY_SRC_DIR}/sys/Shell.cpp
-    #${MY_SRC_DIR}/sys/Application.cpp
 
     ${MY_SRC_DIR}/utl/Logger.cpp
     ${MY_SRC_DIR}/utl/String.cpp
-    ${MY_SRC_DIR}/utl/Timer.cpp
-    ${MY_SRC_DIR}/utl/Misc.cpp
+    #${MY_SRC_DIR}/utl/Timer.cpp
     )
 
 #--------------------------------------
@@ -47,8 +44,9 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(
     ${PROJECT_NAME}
     ${Boost_THREAD_LIBRARY}
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
+    libboost_date_time.a
+    libboost_system.a
+    libboost_filesystem.a
     pthread
     )
 

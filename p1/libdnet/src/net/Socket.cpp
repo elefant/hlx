@@ -12,8 +12,6 @@
 
 #include <stdio.h>
 
-//#define trace printf
-
 namespace
 {
     int findLineEnd
@@ -32,7 +30,7 @@ namespace net
         (
         SocketType aSocketType
         )
-        : utl::Logger( "Socket" )
+        : utl::Logger( "Socket", ENABLE_NONE )
         , iSocket( -1 )
         , iBoundPort( 0 )
         , iIsBound( false )

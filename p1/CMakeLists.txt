@@ -17,12 +17,12 @@ target_link_libraries(dnet)
 #------------------------------------------------
 # TestTcpServer
 #------------------------------------------------
-add_executable(TestTcpServer
+add_executable(TestServer
 	src/ServerMain.cpp)
 
-target_link_libraries( TestTcpServer dnet )
+target_link_libraries( TestServer dnet )
 
-set_target_properties( TestTcpServer PROPERTIES
+set_target_properties( TestServer PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
     COMPILE_FLAGS "-Wall -Wextra -std=c++11"
     )
@@ -30,13 +30,13 @@ set_target_properties( TestTcpServer PROPERTIES
 #------------------------------------------------
 # TestTcpClient
 #------------------------------------------------
-add_executable( TestTcpClient
+add_executable( TestClient
     src/ClientMain.cpp
     )
 
-target_link_libraries( TestTcpClient dnet )
+target_link_libraries( TestClient dnet )
 
-set_target_properties( TestTcpClient PROPERTIES
+set_target_properties( TestClient PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin"
     COMPILE_FLAGS "-Wall -Wextra -std=c++11"
     )

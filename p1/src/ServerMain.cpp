@@ -3,6 +3,34 @@
 
 namespace {
 
+static struct {
+  std::string mUserName;
+  std::string mPassword;
+  bool mIsLoggedIn;
+} ACCEPTABLE_USERS[] = {
+  { "PikachuA", "abcd", false },
+  { "PikachuB", "abcd", false },
+  { "PikachuC", "abcd", false },
+  { "PikachuD", "abcd", false },
+};
+
+static bool verifyUser(const std::string& aUserName, const std::string& aPassword)
+{
+  for (size_t i = 0; i < sizeof(ACCEPTABLE_USERS)/sizeof(ACCEPTABLE_USERS[0]); i++) {
+    auto u = ACCEPTABLE_USERS[i];
+    if (aUserName == u.mUserName && aPassword == u.mPassword) {
+      // User found.
+      return true;
+    }
+    if (aUserName == u.mUserName && aPassword != u.mPassword) {
+      // Invalid password.
+      return false;
+    }
+  }
+  // Invalid user name.
+  return false;
+}
+
 //----------------------------------------------------------
 // TCP server
 //----------------------------------------------------------
@@ -18,10 +46,23 @@ public:
 private:
   virtual void onClientAccepted(net::TcpSocketPtr aClientSocket) override
   {
+    // Verify user log in.
+    std::string userName;
+    std::string password;
+    if (!aClientSocket->receiveLine(userName) ||
+        !aClientSocket->receiveLine(password) ||
+        !verifyUser(userName, password)) {
+      error("Invalid user '%s' logged in", userName.c_str());
+      aClientSocket->close();
+      return;
+    }
+
+    trace("Verify success!");
+
     // Would be run onn off-main thread.
     std::string line;
     while (aClientSocket->receiveLine(line)) {
-      printf("Received %s\n", line.c_str());
+      trace("Received %s", line.c_str());
       const std::string ACK = "ACK\n";
       aClientSocket->send(ACK.c_str(), ACK.length());
     }

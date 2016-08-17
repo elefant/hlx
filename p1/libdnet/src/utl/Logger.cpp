@@ -7,61 +7,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include "Logger.h"
-#include "LoggerC.h"
 #include "String.h"
-#include "sys/Application.h"
-//#include <DeLogger.h>
-
-#define UTL_LOGGER_LOG_TO_STDOUT 1
-
-namespace
-{
-    void removeOldLogs();
-
-    const char* LOG_NAME_FORMAT = "%Y-%m%d-%H%M-%S.txt";
-
-    enum
-    {
-        LOG_FILE_KEEP_DAYS = 7,
-        LOG_FILE_KEEP_HOURS = LOG_FILE_KEEP_DAYS * 24,
-    };
-}
 
 namespace utl
 {
-    static Logger gGeneralLogger = Logger( "General" ); // the general logger
-
-#if( !UTL_LOGGER_USE_NULL_LOGGER )
-
-    /**
-     * Open the log file
-     * TODO: Move the utl::time::getNowString()
-     */
-    static std::string getNowString()
-    {
-        boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
-        std::string nowString = boost::posix_time::to_iso_extended_string( now );
-        return nowString;
-    }
-
-    Logger::StaticData Logger::sStaticData;
-
-    bool Logger::sUseDeLogger = true;
-
-    /**
-     * Open the log file
-     */
-    Logger::StaticData::StaticData()
-    {
-    }
-
-    /**
-     * Close the log file
-     */
-    Logger::StaticData::~StaticData()
-    {
-    }
-
     /**
      * Ctor
      * @param aName
@@ -71,55 +20,11 @@ namespace utl
         const std::string& aName,
         EnableType aEnabledFlag
         )
-        : Loggable( aName, aEnabledFlag )
-        , iName( aName )
+        : iName( aName )
         , iEnabledFlag( aEnabledFlag )
     {
-        boost::replace_all( iName, "|", "_" );
         setlinebuf( stdout );
     }
-
-    void Logger::setUseDeLogger
-        (
-        bool aUseDeLogger
-        )
-    {
-        sUseDeLogger = aUseDeLogger;
-    }
-
-    void Logger::logToDeLogger
-        (
-        LogType aLogType,
-        const std::string& aMsg
-        ) const
-    {
-        /*
-        DeLogger& deLogger = DeLogger::getRootLogger();
-        std::string deLoggerMsg = iName + "|" + aMsg;
-        switch( aLogType )
-        {
-            case LOG_TRACE:
-                deLogger.trace( deLoggerMsg );
-                break;
-
-            case LOG_WARNING:
-                deLogger.warn( deLoggerMsg );
-                break;
-
-            case LOG_ERROR:
-                deLogger.error( deLoggerMsg );
-                break;
-
-            case LOG_ASSERT:
-                deLogger.fatal( deLoggerMsg );
-                break;
-
-            default:
-                break;
-        }
-        */
-    }
-
 
     /**
      * The only one point to output the message
@@ -136,18 +41,10 @@ namespace utl
     {
         if( !LOG_TYPE_IS_ENABLED( iEnabledFlag, aLogType ) )
         {
-            //return;
+            return;
         }
 
         std::string msg = strFormat( aFormat, aVaList );
-
-        std::cout << msg << "\n";
-
-        if( sUseDeLogger )
-        {
-            logToDeLogger( aLogType, msg );
-            //return;
-        }
 
         std::string typeString;
         switch( aLogType )
@@ -173,23 +70,13 @@ namespace utl
 
         std::string formattedLog = strFormat
             (
-            "%s|%s|%s|%s\n",
-            getNowString().c_str(),
+            "%s|%s|%s\n",
             iName.c_str(),
             typeString.c_str(),
             msg.c_str()
             );
 
-    #if( UTL_LOGGER_LOG_TO_STDOUT )
         std::cout << formattedLog;
-    #endif
-
-    #if( UTL_LOGGER_LOG_TO_FILE )
-        if( sStaticData.iLogFp )
-        {
-            fprintf( sStaticData.iLogFp, "%s", formattedLog.c_str() );
-        }
-    #endif
     }
 
     /**
@@ -262,211 +149,6 @@ namespace utl
             va_end( aVaList );
             doLog( LOG_ASSERT, aFormat, aVaList );
         }
-    }
-
-    /**
-     * Get log directory
-     * @return
-     */
-    std::string Loggable::getLogDir()
-    {
-        /*
-        return utl::strFormat
-            (
-            "%s/../log/%s/",
-            sys::application::getExeDir().c_str(),
-            sys::application::getExeName().c_str()
-            );
-            */
-        return "";
-    }
-
-    /**
-     * Get log name
-     * @return
-     */
-    std::string Loggable::getLogName()
-    {
-        time_t t = time( NULL );
-        struct tm tm = *localtime( &t );
-        char logFileName[1024] = { 0 };
-        strftime( logFileName, sizeof( logFileName ), LOG_NAME_FORMAT, &tm );
-
-        return logFileName;
-    }
-
-#endif
-
-    //------------------------------------------------------
-    // UTL APIs
-    //------------------------------------------------------
-
-    /**
-     * Trace
-     * @param aFormat
-     * @param ...
-     */
-    void trace
-        (
-        const char* aFormat,
-        ...
-        )
-    {
-        va_list aVaList;
-        va_start( aVaList, aFormat );
-        va_end( aVaList );
-        gGeneralLogger.trace( strFormat( aFormat, aVaList ).c_str() );
-    }
-
-    /**
-     * Warning
-     * @param aFormat
-     * @param ...
-     */
-    void warning
-        (
-        const char* aFormat,
-        ...
-        )
-    {
-        va_list aVaList;
-        va_start( aVaList, aFormat );
-        va_end( aVaList );
-        gGeneralLogger.warning( strFormat( aFormat, aVaList ).c_str() );
-    }
-
-    /**
-     * Error
-     * @param aFormat
-     * @param ...
-     */
-    void error
-        (
-        const char* aFormat,
-        ...
-        )
-    {
-        va_list aVaList;
-        va_start( aVaList, aFormat );
-        va_end( aVaList );
-        gGeneralLogger.error( strFormat( aFormat, aVaList ).c_str() );
-    }
-
-    /**
-     * Assert
-     * @param aStatement
-     * @param aFormat
-     * @param ...
-     */
-    void assert
-        (
-        bool aStatement,
-        const char* aFormat,
-        ...
-        )
-    {
-        va_list aVaList;
-        va_start( aVaList, aFormat );
-        va_end( aVaList );
-        gGeneralLogger.assert( aStatement, strFormat( aFormat, aVaList ).c_str() );
-    }
-}
-
-//-----------------------------------------------------
-// A C-version log functions
-//-----------------------------------------------------
-
-using namespace utl;
-
-/**
- * trace
- * @param aFormat
- * @param ...
- */
-void utl_trace
-    (
-    const char* aFormat,
-    ...
-    )
-{
-    va_list aVaList;
-    va_start( aVaList, aFormat );
-    va_end( aVaList );
-    gGeneralLogger.trace( strFormat( aFormat, aVaList ).c_str() );
-}
-
-/**
- * warning
- * @param aFormat
- * @param ...
- */
-void utl_warning
-    (
-    const char* aFormat,
-    ...
-    )
-{
-    va_list aVaList;
-    va_start( aVaList, aFormat );
-    va_end( aVaList );
-    gGeneralLogger.warning( strFormat( aFormat, aVaList ).c_str() );
-}
-
-/**
- * error
- * @param aFormat
- * @param ...
- */
-void utl_error
-    (
-    const char* aFormat,
-    ...
-    )
-{
-    va_list aVaList;
-    va_start( aVaList, aFormat );
-    va_end( aVaList );
-    gGeneralLogger.error( strFormat( aFormat, aVaList ).c_str() );
-}
-
-namespace
-{
-    /**
-     * Remove old logs
-     */
-    void removeOldLogs()
-    {
-        namespace bf = boost::filesystem;
-        namespace bp = boost::posix_time;
-
-        bf::path logDir( utl::Loggable::getLogDir() );
-        if( !bf::exists( logDir ) )
-        {
-            return; // the log dir not exists
-        }
-
-        if( !bf::is_directory( logDir ) )
-        {
-            return; // logDir is not a dir
-        }
-
-        bf::directory_iterator dirIter( logDir );
-        bf::directory_iterator endIter;
-        bp::ptime now( bp::second_clock::universal_time() );
-        for( ; dirIter != endIter ; ++dirIter )
-        {
-            if( !bf::is_regular_file( dirIter->status() ) )
-            {
-                continue;
-            }
-
-            bp::ptime lastWriteTime( bp::from_time_t( bf::last_write_time( *dirIter ) ) );
-            if( lastWriteTime < now - bp::time_duration( bp::hours( LOG_FILE_KEEP_HOURS ) ) )
-            {
-                bf::remove( *dirIter );
-            }
-        }
-
     }
 }
 

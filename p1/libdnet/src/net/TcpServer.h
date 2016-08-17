@@ -7,7 +7,7 @@
 
 namespace net
 {
-    class TcpServer : private utl::Logger
+    class TcpServer : public utl::Logger
     {
     public:
         TcpServer

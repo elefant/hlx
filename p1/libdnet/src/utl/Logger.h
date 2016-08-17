@@ -1,48 +1,38 @@
 #ifndef UTL_LOGGER_H
 #define UTL_LOGGER_H
 
-#include "Loggable.h"
+#include <stdarg.h>
 
-#ifndef UTL_LOGGER_USE_NULL_LOGGER
-#define UTL_LOGGER_USE_NULL_LOGGER 0
+#ifdef assert
+#undef assert
 #endif
 
-#ifndef UTL_LOGGER_LOG_TO_FILE
-#define UTL_LOGGER_LOG_TO_FILE 1
-#endif
-
-#ifndef UTL_LOGGER_LOG_TO_STDOUT
-#define UTL_LOGGER_LOG_TO_STDOUT 1
-#endif
+#define LOG_TYPE_TO_ENABLE( type ) ( 1 << ( type ) )
+#define LOG_TYPE_IS_ENABLED( flag , type )  ( 0 != ( ( flag ) & LOG_TYPE_TO_ENABLE( type ) ) )
 
 namespace utl
 {
-#if( UTL_LOGGER_USE_NULL_LOGGER )
-    class Logger : public LoggerNull
-    {
-        Logger
-            (
-            const std::string& aName,
-            EnableType aEnabledFlag = ENABLE_ALL
-            )
-            : LoggerNull( aName, aEnabledFlag )
-        {
-        }
-    };
-#else
-    class Logger : public Loggable
+    class Logger
     {
     public:
-        struct StaticData
+        enum LogType
         {
-        public:
-            StaticData();
+            LOG_TRACE,
+            LOG_WARNING,
+            LOG_ERROR,
+            LOG_ASSERT,
+            LOG_TYPE_CNT,
+        };
 
-            ~StaticData();
+        enum EnableType
+        {
+            ENABLE_TRACE   = LOG_TYPE_TO_ENABLE( LOG_TRACE ),
+            ENABLE_WARNING = LOG_TYPE_TO_ENABLE( LOG_WARNING ),
+            ENABLE_ERROR   = LOG_TYPE_TO_ENABLE( LOG_ERROR ),
+            ENABLE_ASSERT  = LOG_TYPE_TO_ENABLE( LOG_ASSERT ),
 
-        #if( UTL_LOGGER_LOG_TO_FILE )
-            FILE* iLogFp;
-        #endif
+            ENABLE_ALL  = 0xFFFFFFFF,
+            ENABLE_NONE = 0,
         };
 
     public:
@@ -77,12 +67,6 @@ namespace utl
             ...
             ) const;
 
-    public:
-        static void setUseDeLogger
-            (
-            bool aUseDeLogger
-            );
-
     private:
         void doLog
             (
@@ -91,22 +75,11 @@ namespace utl
             va_list& aVaList
             ) const;
 
-        void logToDeLogger
-            (
-            LogType aLogType,
-            const std::string& aMsg
-            ) const;
-
     private:
         std::string iName;
 
         EnableType iEnabledFlag;
-
-        static StaticData sStaticData;
-
-        static bool sUseDeLogger;
     };
-#endif
 
     void trace
         (
